@@ -2,8 +2,13 @@
 // for information about these interfaces
 declare global {
 	namespace App {
-		// interface Error {}
-		// interface Locals {}
+		interface Error {
+			status: number;
+			message: string;
+		}
+		interface Locals {
+			authToken?: string;
+		}
 		// interface PageData {}
 		// interface PageState {}
 		// interface Platform {}
