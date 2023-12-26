@@ -12,7 +12,7 @@
 		"lint": "prettier --check . && eslint .",
 		"format": "prettier --write .",
 		"test:integration": "playwright test",
-		"test:unit": "vitest",
+		"test:unit": "dotenv -e .vercel/.env.development.local -- vitest --ui",
 		"postinstall": "prisma generate && svelte-kit sync"
 	},
 	"devDependencies": {

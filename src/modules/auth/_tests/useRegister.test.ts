@@ -3,32 +3,33 @@ import bcrypt from 'bcrypt';
 import type { User } from '@prisma/client';
 import { useRegister } from '../usecases/useRegister';
 import crypto from 'crypto';
+import type { IAuthRepository } from '../core/interfaces/IAuthRepository';
 
 describe('useRegister', () => {
 	const fakePassword = 'password';
 	const fakeUser = {
-		id: "1",
-		passwordHash: "",
+		id: '1',
+		passwordHash: '',
 		createdAt: new Date(),
 		updatedAt: new Date(),
 		email: 'test@test.com',
-		username: 'test',
+		username: 'test'
 	};
 	let users: User[] = [];
-	const repository = {
+	const repository: IAuthRepository = {
 		createUser: async (email: string, passwordHash: string, username: string) => {
 			const newUser = {
 				id: crypto.randomUUID(),
-				passwordHash: "",
+				passwordHash: '',
 				createdAt: new Date(),
 				updatedAt: new Date(),
 				email,
-				username,
+				username
 			};
 			users.push(newUser);
 			return newUser;
 		},
-		getUserByEmail: async (email: string) => {
+		signInUser: async (email: string) => {
 			const user = users.find((user) => user.email === email);
 			return user || null;
 		}
@@ -40,19 +41,35 @@ describe('useRegister', () => {
 
 	beforeEach(() => {
 		users = [];
-	})
+	});
 
 	it('should register a user', async () => {
-		const result = await useRegister(repository).launch({email: fakeUser.email, password: fakePassword, username: fakeUser.username});
+		const result = await useRegister(repository).launch({
+			email: fakeUser.email,
+			password: fakePassword,
+			username: fakeUser.username
+		});
 
-		expect(result).toBeDefined()
+		expect(result).toBeDefined();
 		expect(result).toHaveProperty('id');
 	});
 
 	it('should throw an error if the email is already taken', async () => {
 		users.push(fakeUser);
-		const result = useRegister(repository).launch({email: fakeUser.email, password: fakePassword, username: fakeUser.username});
+		const localRepository: IAuthRepository = {
+			createUser: async () => {
+				throw new Error('This user already exists');
+			},
+			signInUser: async () => {
+				throw new Error();
+			}
+		};
+		const result = useRegister(localRepository).launch({
+			email: fakeUser.email,
+			password: fakePassword,
+			username: fakeUser.username
+		});
 
-		await expect(result).rejects.toThrow("This user already exists");
+		await expect(result).rejects.toThrow('This user already exists');
 	});
 });

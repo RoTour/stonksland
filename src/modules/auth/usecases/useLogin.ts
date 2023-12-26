@@ -19,7 +19,7 @@ export const useLogin = (repository: IAuthRepository): UseCase<Input, Output> =>
 			if (!user) {
 				throw new AppError('BAD_REQUEST', 'User does not exist')
 			}
-			const token = jwt.sign({ id: user.id }, env.JWT_SECRET);
+			const token = jwt.sign({ id: user.id }, env.JWT_SECRET ?? '');
 			return {
 				token
 			};
