@@ -1,14 +1,27 @@
+import { env } from '$env/dynamic/private';
 import { prisma } from '$lib/db/client';
+import { supabase } from '$lib/supabase/client';
+import { COOKEYS } from '$lib/utils/cookies.helper';
+import type { User } from '@supabase/supabase-js';
 import type { RequestEvent } from '@sveltejs/kit';
-import type { inferAsyncReturnType } from '@trpc/server';
+import jwt from 'jsonwebtoken';
 
-// we're not using the event parameter is this example,
-// hence the eslint-disable rule
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export async function createContext(event: RequestEvent) {
-  return {
-    prisma: prisma,
-  };
+	const supabaseUser: User | undefined = undefined;
+	try {
+		const userToken = event.cookies.get(COOKEYS.authToken) ?? event.locals.authToken ?? '';
+		const verifiedToken = jwt.verify(userToken, env.JWT_SECRET) as { userId: string };
+		return { event, prisma, supabase, userToken, userId: verifiedToken.userId, supabaseUser};
+	} catch {
+		return { event, prisma, supabase, userToken: '', userId: '', supabaseUser };
+	}
 }
 
-export type Context = inferAsyncReturnType<typeof createContext>;
+export type Context = {
+	prisma: typeof prisma;
+	supabase: typeof supabase;
+	event: RequestEvent;
+	userToken: string;
+	userId: string;
+	supabaseUser: User | undefined;
+}

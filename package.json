@@ -13,7 +13,8 @@
 		"format": "prettier --write .",
 		"test:integration": "playwright test",
 		"test:unit": "dotenv -e .vercel/.env.development.local -- vitest --ui",
-		"postinstall": "prisma generate && svelte-kit sync"
+		"postinstall": "prisma generate && svelte-kit sync",
+		"migrate:dev": "dotenv -e .vercel/.env.development.local -- prisma migrate dev"
 	},
 	"devDependencies": {
 		"@playwright/test": "^1.28.1",
